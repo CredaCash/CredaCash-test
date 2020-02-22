@@ -1,7 +1,7 @@
 /*
  * CredaCash (TM) cryptocurrency and blockchain
  *
- * Copyright (C) 2015-2019 Creda Software, Inc.
+ * Copyright (C) 2015-2020 Creda Software, Inc.
  *
  * walletdb.cpp
 */
@@ -44,8 +44,6 @@
 
 #define DB_TAG			"CredaCash Wallet"
 #define DB_SCHEMA		5
-
-#define WALLET_ID_BYTES	(128/8)
 
 //static boost::shared_mutex db_mutex; // v1.69 boost::shared_mutex is buggy--throwing exceptions that exclusive waiter count went negative
 static mutex db_mutex;

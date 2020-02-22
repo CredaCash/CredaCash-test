@@ -1,7 +1,7 @@
 /*
  * CredaCash (TM) cryptocurrency and blockchain
  *
- * Copyright (C) 2015-2019 Creda Software, Inc.
+ * Copyright (C) 2015-2020 Creda Software, Inc.
  *
  * jsonrpc.cpp
 */
@@ -115,10 +115,12 @@ static void try_one_rpc(const string& json, const string& method, Json::Value& p
 		"ping - queries the transaction server and returns the ping time in seconds\\n"
 		"cc.time - returns the wallet's current time\\n"
 		"cc.mint - mint currency (if allowed by blockchain)\\n"
-		"cc.unique_id_generate (prefix random_bits checksum_chars) - generate a unique id\\n"
+		"cc.unique_id_generate (\\\"prefix\\\" random_bits checksum_chars) - generate a unique id\\n"
 		"cc.send \\\"reference_id\\\" \\\"destination\\\" asset amount\\n"
 		"cc.send_async \\\"reference_id\\\" \\\"destination\\\" asset amount\\n"
-		"cc.poll_destination \\\"destination\\\" (polling_addresses last_received_max ) - check destination for incoming payments\\n"
+		"cc.transaction_cancel \\\"txid\\\" - cancel transaction\\n"
+		"cc.destination_poll \\\"destination\\\" (polling_addresses last_received_max ) - check destination for incoming payments\\n"
+		"cc.list_change_destinations - Diagnostic - list destinations used for change\\n"
 		"cc.billets_poll_unspent - Diagnostic - poll and update unspent billets\\n"
 		"cc.billets_release_allocated ( reset_balance ) - Diagnostic - release all billets allocated to transactions\\n"
 		"cc.dump_transactions (start count include_billets) - Diagnostic - dump transactions in internal format\\n"
@@ -441,8 +443,6 @@ static void try_one_rpc(const string& json, const string& method, Json::Value& p
 	}
 	else if (method == "abandontransaction")
 	{
-		// FUTURE: automatically abandon tx's based on command line param?
-
 		if (params.size() != 1)
 			throw RPC_Exception(RPC_MISC_ERROR, method + " \\\"txid\\\"");
 
@@ -843,7 +843,7 @@ static void try_one_rpc(const string& json, const string& method, Json::Value& p
 	else if (method == "cc.unique_id_generate")
 	{
 		if ( /* params.size() < 0 || */ params.size() > 3)
-			throw RPC_Exception(RPC_MISC_ERROR, method + " (prefix random_bits checksum_chars)");
+			throw RPC_Exception(RPC_MISC_ERROR, method + " (\\\"prefix\\\" random_bits checksum_chars)");
 
 		if (params.size() > 1 && !params[1].isConvertibleTo(Json::uintValue))
 			throw RPC_Exception(RPC_MISC_ERROR, not_int_err);
@@ -873,10 +873,17 @@ static void try_one_rpc(const string& json, const string& method, Json::Value& p
 				params.size() > 6 ? params[6].asBool() : false,
 				dbconn, txquery, rstream);
 	}
-	else if (method == "cc.poll_destination")
+	else if (method == "cc.transaction_cancel")
+	{
+		if (params.size() != 1)
+			throw RPC_Exception(RPC_MISC_ERROR, method + " \\\"txid\\\"");
+
+		cc_transaction_cancel(params[0].asString(), dbconn, txquery, rstream);
+	}
+	else if (method == "cc.destination_poll")
 	{
 		if (params.size() < 1 || params.size() > 3)
-			throw RPC_Exception(RPC_MISC_ERROR, method + " destination (polling_addresses last_received_max)");
+			throw RPC_Exception(RPC_MISC_ERROR, method + " \\\"destination\\\" (polling_addresses last_received_max)");
 
 		if (params.size() > 1 && !params[1].isConvertibleTo(Json::uintValue))
 			throw RPC_Exception(RPC_MISC_ERROR, not_int_err);
@@ -887,14 +894,21 @@ static void try_one_rpc(const string& json, const string& method, Json::Value& p
 		//if (params.size() > 3 && params[3].asInt() < 0)
 		//	throw RPC_Exception(RPC_INVALID_PARAMETER, negative_from_err);
 
-		cc_poll_destination(params[0].asString(), params.size() > 1 ? params[1].asUInt() : 0, params.size() > 2 ? params[2].asUInt64() : 0, dbconn, txquery, rstream);
+		cc_destination_poll(params[0].asString(), params.size() > 1 ? params[1].asUInt() : 0, params.size() > 2 ? params[2].asUInt64() : 0, dbconn, txquery, rstream);
 	}
-	else if (method == "cc.poll_mint")
+	else if (method == "cc.mint_poll")
 	{
 		if (params.size() != 0)
 			throw RPC_Exception(RPC_MISC_ERROR, method);
 
-		cc_poll_mint(dbconn, txquery, rstream);
+		cc_mint_poll(dbconn, txquery, rstream);
+	}
+	else if (method == "cc.list_change_destinations")
+	{
+		if (params.size() != 0)
+			throw RPC_Exception(RPC_MISC_ERROR, method);
+
+		cc_list_change_destinations(dbconn, txquery, rstream);
 	}
 	else if (method == "cc.billets_poll_unspent")
 	{

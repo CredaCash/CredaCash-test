@@ -1,7 +1,7 @@
 /*
  * CredaCash (TM) cryptocurrency and blockchain
  *
- * Copyright (C) 2015-2019 Creda Software, Inc.
+ * Copyright (C) 2015-2020 Creda Software, Inc.
  *
  * txrpc.h
 */
@@ -20,8 +20,12 @@ void cc_unique_id_generate(const string& prefix, unsigned random_bits, unsigned 
 
 void cc_send(bool async, const string& ref_id, const string& addr, const snarkfront::bigint_t& amount, const string& comment, const string& comment_to, bool subfee, DbConn *dbconn, TxQuery& txquery, ostringstream& rstream);
 
-void cc_poll_destination(const string& destination, unsigned polling_addresses, uint64_t last_receive_max, DbConn *dbconn, TxQuery& txquery, ostringstream& rstream);
-void cc_poll_mint(DbConn *dbconn, TxQuery& txquery, ostringstream& rstream);
+void cc_transaction_cancel(const string& txid, DbConn *dbconn, TxQuery& txquery, ostringstream& rstream);
+
+void cc_destination_poll(const string& destination, unsigned polling_addresses, uint64_t last_receive_max, DbConn *dbconn, TxQuery& txquery, ostringstream& rstream);
+void cc_mint_poll(DbConn *dbconn, TxQuery& txquery, ostringstream& rstream);
+
+void cc_list_change_destinations(DbConn *dbconn, TxQuery& txquery, ostringstream& rstream);
 
 void cc_billets_poll_unspent(DbConn *dbconn, TxQuery& txquery, ostringstream& rstream);
 void cc_billets_release_allocated(bool reset_balance, DbConn *dbconn, TxQuery& txquery, ostringstream& rstream);

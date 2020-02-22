@@ -1,7 +1,7 @@
 /*
  * CredaCash (TM) cryptocurrency and blockchain
  *
- * Copyright (C) 2015-2019 Creda Software, Inc.
+ * Copyright (C) 2015-2020 Creda Software, Inc.
  *
  * txquery.hpp
 */
@@ -71,9 +71,10 @@ class TxQuery : public TxConnection
 	int ParseQueryAddressQueryResults(const snarkfront::bigint_t& address, const uint64_t commitstart, Json::Value root, QueryAddressResults &results);
 
 	unsigned m_host_index;
-	bool m_possibly_sent;
 
 public:
+	bool m_possibly_sent;
+
 	static CCServer::ConnectionFactoryInstantiation<TxQuery> txconnfac;
 	static CCServer::ConnectionManagerBase nullconnmgr;
 
@@ -92,7 +93,7 @@ public:
 	void ClearHost();
 	const string& GetHost();
 
-	int SubmitTx(const TxPay& tx, uint64_t& next_commitnum);
+	int SubmitTx(const TxPay& ts, uint64_t& next_commitnum);
 
 	int QueryParams(TxParams& txparams, vector<char> &querybuf);
 	int QueryAddress(uint64_t blockchain, const snarkfront::bigint_t& address, const uint64_t commitstart, QueryAddressResults &results);

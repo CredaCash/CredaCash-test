@@ -1,7 +1,7 @@
 /*
  * CredaCash (TM) cryptocurrency and blockchain
  *
- * Copyright (C) 2015-2019 Creda Software, Inc.
+ * Copyright (C) 2015-2020 Creda Software, Inc.
  *
  * totals.hpp
 */
@@ -15,6 +15,8 @@
 #define TOTAL_TYPE_DA_BIT			(1 << 5)
 #define TOTAL_TYPE_DA_DESTINATION	0
 #define TOTAL_TYPE_DA_ACCOUNT		TOTAL_TYPE_DA_BIT
+
+// note: balance reported by wallet is sum of (cleared - allocated + pending to a trusted and spendable destination)
 
 // note: ALLOCATED	= 8
 // note: PENDING	= 16
